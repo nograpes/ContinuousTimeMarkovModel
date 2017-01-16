@@ -99,43 +99,43 @@ class DiscreteObsMJP(Continuous):
             self.obs_jump_ind[observed_jumps == step_sizes[ind]] = ind
 
 #        for n in range(N):
-#        	obs_jumps[n,T[n]-1:] = -1
+#            obs_jumps[n,T[n]-1:] = -1
 #
 #        #convert observed jumps to their appropriate array index
-#		obs_jump_ind = obs_jumps.copy()
-#		for index, step in enumerate(step_sizes):
-#		    obs_jump_ind[obs_jumps == step] = index
-#		self.obs_jump_ind = obs_jump_ind
+#        obs_jump_ind = obs_jumps.copy()
+#        for index, step in enumerate(step_sizes):
+#            obs_jump_ind[obs_jumps == step] = index
+#        self.obs_jump_ind = obs_jump_ind
 
     def computeC(self,S):
-    	M = self.M
-    	n_step_sizes = len(self.step_sizes)
+        M = self.M
+        n_step_sizes = len(self.step_sizes)
 
-    	obs_jump_ind = TT.as_tensor_variable(self.obs_jump_ind, 'obs_jump_ind')
-    	tau_ind = obs_jump_ind[1:]*M*M
-    	#tau_ind = obs_jump_ind[:-1]*M*M
-    	#tau_ind = TT.flatten(obs_jump_ind)[:-1]*M*M
-    	keep_jumps = (tau_ind >= 0).nonzero()
-    	
-    	jump_from_ind = S[:-1]*M
-    	jump_to_ind = S[1:]
-    	#jump_from_ind = TT.flatten(S)[:-1]*M
-    	#jump_to_ind = TT.flatten(S)[1:]
+        obs_jump_ind = TT.as_tensor_variable(self.obs_jump_ind, 'obs_jump_ind')
+        tau_ind = obs_jump_ind[1:]*M*M
+        #tau_ind = obs_jump_ind[:-1]*M*M
+        #tau_ind = TT.flatten(obs_jump_ind)[:-1]*M*M
+        keep_jumps = (tau_ind >= 0).nonzero()
+        
+        jump_from_ind = S[:-1]*M
+        jump_to_ind = S[1:]
+        #jump_from_ind = TT.flatten(S)[:-1]*M
+        #jump_to_ind = TT.flatten(S)[1:]
 
         #import pdb; pdb.set_trace()
-    	flat_ind = (tau_ind + jump_from_ind + jump_to_ind)[keep_jumps]
-    	flat_ind_counts = bincount(flat_ind, minlength=n_step_sizes*M*M)
+        flat_ind = (tau_ind + jump_from_ind + jump_to_ind)[keep_jumps]
+        flat_ind_counts = bincount(flat_ind, minlength=n_step_sizes*M*M)
 
-    	C = flat_ind_counts.reshape(shape=np.array([n_step_sizes,M,M]))
+        C = flat_ind_counts.reshape(shape=np.array([n_step_sizes,M,M]))
         
         return C
         
     #@profilingUtil.timefunc
     def logp(self, S):
-    	l = 0.0
+        l = 0.0
 
-    	#add prior
-    	pi = self.pi
+        #add prior
+        pi = self.pi
         #Get time 0 states
         zeroIndices = np.roll(self.T.cumsum(),1)
         zeroIndices[0] = 0
@@ -143,7 +143,7 @@ class DiscreteObsMJP(Continuous):
         l += TT.sum(TT.log(pi[S[zeroIndices]]))
         #l += TT.sum(TT.log(pi[S[:,0]]))
 
-    	#add likelihood
+        #add likelihood
         Q = self.Q
         step_sizes = self.step_sizes
 
@@ -196,18 +196,18 @@ def logp_numpy_comorbidities(l,nObs,B0,B,X,S,T):
         #logLike += (X[changed]*np.log(B[:,S[changed]]).T).sum()
         
 
-#	for n in xrange(N):
-#		pX0 = np.prod(B0[X[:,0,n] == 1, S[n,0]]) * np.prod(1-B0[X[:,0,n] != 1, S[n,0]])
-#		ll += np.log(pX0)
+#    for n in xrange(N):
+#        pX0 = np.prod(B0[X[:,0,n] == 1, S[n,0]]) * np.prod(1-B0[X[:,0,n] != 1, S[n,0]])
+#        ll += np.log(pX0)
 #
-#		for t in range(1,T[n]):
-#			if S[n,t] != S[n,t-1]:
-#				turned_on = ((X[:,t-1,n] == 0) & (X[:,t,n] == 1))
-#				stayed_off = ((X[:,t-1,n] == 0) & (X[:,t,n] == 0))
-#				ll += np.log(np.prod(B[turned_on, S[n,t]]))
-#				ll += np.log(np.prod(1-B[stayed_off, S[n,t]]))
+#        for t in range(1,T[n]):
+#            if S[n,t] != S[n,t-1]:
+#                turned_on = ((X[:,t-1,n] == 0) & (X[:,t,n] == 1))
+#                stayed_off = ((X[:,t-1,n] == 0) & (X[:,t,n] == 0))
+#                ll += np.log(np.prod(B[turned_on, S[n,t]]))
+#                ll += np.log(np.prod(1-B[stayed_off, S[n,t]]))
 #
-	return logLike
+    return logLike
 
 def logp_theano_comorbidities(logLike,nObs,B0,B,X,S,T):
         logLike = 0.0
@@ -241,7 +241,7 @@ def logp_theano_comorbidities(logLike,nObs,B0,B,X,S,T):
         logLike += (((1-X[changed])*(1-X[changed-1]))*TT.log(1.-B[:,S[changed]]).T).sum()
         #logLike += (X[changed]*np.log(B[:,S[changed]]).T).sum()
         
-	return logLike
+    return logLike
 
 class Comorbidities(Continuous):
     def __init__(self, S, B0, B, T, shape, *args, **kwargs):
@@ -276,20 +276,20 @@ class Comorbidities(Continuous):
         #l = logp_numpy_comorbidities(TT.as_tensor_variable(l),TT.as_tensor_variable(N),B0,B,X,S,TT.as_tensor_variable(T))        
         '''
         for n in xrange(N):
-        	#likelihood of X0
-        	
-			
-        	l += TT.sum(Binomial.dist(n=1, p=B0[:,S[n,0]]).logp(X[:,0,n]))
+            #likelihood of X0
             
-	        for t in range(1,T[n]):
-	            if TT.eq(S[n,t],S[n,t-1]):
-	            	l += 0.0
-	            else:
-	            	turned_on = (X[:,t-1,n] == 1).nonzero()
-	            	stayed_off = (X[:,t-1,n] != 1).nonzero()
-	            	l += TT.sum(Binomial.dist(n=1, p=B[turned_on,S[n,t]]).logp(X[turned_on,t,n]))
-	            	l += TT.sum(Binomial.dist(n=1, p=B[stayed_off,S[n,t]]).logp(X[stayed_off,t,n]))
-	    '''
+            
+            l += TT.sum(Binomial.dist(n=1, p=B0[:,S[n,0]]).logp(X[:,0,n]))
+            
+            for t in range(1,T[n]):
+                if TT.eq(S[n,t],S[n,t-1]):
+                    l += 0.0
+                else:
+                    turned_on = (X[:,t-1,n] == 1).nonzero()
+                    stayed_off = (X[:,t-1,n] != 1).nonzero()
+                    l += TT.sum(Binomial.dist(n=1, p=B[turned_on,S[n,t]]).logp(X[turned_on,t,n]))
+                    l += TT.sum(Binomial.dist(n=1, p=B[stayed_off,S[n,t]]).logp(X[stayed_off,t,n]))
+        '''
 
         
         return l
