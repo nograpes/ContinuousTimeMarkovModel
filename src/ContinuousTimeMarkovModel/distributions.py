@@ -195,7 +195,7 @@ def logp_numpy_comorbidities(l,nObs,B0,B,X,S,T):
         logLike += (((1-X[changed])*(1-X[changed-1]))*np.log(1.-B[:,S[changed]]).T).sum()
         #logLike += (X[changed]*np.log(B[:,S[changed]]).T).sum()
         
-
+        
 #    for n in xrange(N):
 #        pX0 = np.prod(B0[X[:,0,n] == 1, S[n,0]]) * np.prod(1-B0[X[:,0,n] != 1, S[n,0]])
 #        ll += np.log(pX0)
@@ -207,7 +207,7 @@ def logp_numpy_comorbidities(l,nObs,B0,B,X,S,T):
 #                ll += np.log(np.prod(B[turned_on, S[n,t]]))
 #                ll += np.log(np.prod(1-B[stayed_off, S[n,t]]))
 #
-    return logLike
+        return logLike
 
 def logp_theano_comorbidities(logLike,nObs,B0,B,X,S,T):
         logLike = 0.0
