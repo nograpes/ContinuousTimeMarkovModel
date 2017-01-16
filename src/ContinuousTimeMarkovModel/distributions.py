@@ -210,37 +210,30 @@ def logp_numpy_comorbidities(l,nObs,B0,B,X,S,T):
         return logLike
 
 def logp_theano_comorbidities(logLike,nObs,B0,B,X,S,T):
-        logLike = 0.0
-
-        #Unwrap t=0 points for B0
-        zeroIndices = np.roll(T.cumsum(),1)
-        #zeroIndices = np.roll(T.cumsum(),1)
-        zeroIndices[0] = 0;
-        zeroIndices = zeroIndices.astype('int32')
-
-        #import pdb; pdb.set_trace()
-
-        #Likelihood from B0 for X=1 and X=0 cases
-        logLike += (X[zeroIndices]*TT.log(B0[:,S[zeroIndices]]).T).sum()
-        logLike += ((1-X[zeroIndices])*TT.log(1.-B0[:,S[zeroIndices]]).T).sum()
-
-        stateChange = S[1:]-S[:-1]
+    logLike = 0.0
+    #Unwrap t=0 points for B0
+    zeroIndices = np.roll(T.cumsum(),1)
+    #zeroIndices = np.roll(T.cumsum(),1)
+    zeroIndices[0] = 0;
+    zeroIndices = zeroIndices.astype('int32')
+    #import pdb; pdb.set_trace()
+    #Likelihood from B0 for X=1 and X=0 cases
+    logLike += (X[zeroIndices]*TT.log(B0[:,S[zeroIndices]]).T).sum()
+    logLike += ((1-X[zeroIndices])*TT.log(1.-B0[:,S[zeroIndices]]).T).sum()
+    stateChange = S[1:]-S[:-1]
     # Don't consider t=0 points
-        #import pdb; pdb.set_trace()
-        #setZero = TT.as_tensor_variable(zeroIndices[1:]-1)
-        #TT.set_subtensor(stateChange[setZero],0)
-        stateChange = TT.set_subtensor(stateChange[zeroIndices[1:]-1],0)
-        #stateChange[setZero] = 0
-        #stateChange[zeroIndices[1:]-1] = 0
-        changed = TT.nonzero(stateChange)[0]+1
-
-        #import pdb; pdb.set_trace()
-
-        # A change can only happen from 0 to 1 given our assumptions
-        logLike += ((X[changed]-X[changed-1])*TT.log(B[:,S[changed]]).T).sum()
-        logLike += (((1-X[changed])*(1-X[changed-1]))*TT.log(1.-B[:,S[changed]]).T).sum()
-        #logLike += (X[changed]*np.log(B[:,S[changed]]).T).sum()
-        
+    #import pdb; pdb.set_trace()
+    #setZero = TT.as_tensor_variable(zeroIndices[1:]-1)
+    #TT.set_subtensor(stateChange[setZero],0)
+    stateChange = TT.set_subtensor(stateChange[zeroIndices[1:]-1],0)
+    #stateChange[setZero] = 0
+    #stateChange[zeroIndices[1:]-1] = 0
+    changed = TT.nonzero(stateChange)[0]+1
+    #import pdb; pdb.set_trace()
+    # A change can only happen from 0 to 1 given our assumptions
+    logLike += ((X[changed]-X[changed-1])*TT.log(B[:,S[changed]]).T).sum()
+    logLike += (((1-X[changed])*(1-X[changed-1]))*TT.log(1.-B[:,S[changed]]).T).sum()
+    #logLike += (X[changed]*np.log(B[:,S[changed]]).T).sum()
     return logLike
 
 class Comorbidities(Continuous):
